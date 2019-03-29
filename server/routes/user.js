@@ -9,7 +9,29 @@ app.get('/', function (req, res) {
 });
 
 app.get('/user', function (req, res) {
-    res.json('get User')
+
+    const skip = Number(req.query.skip) || 0;
+    const limit = Number(req.query.limit) || 10;
+
+    User.find({ state: true }, 'email name state role google img')
+        .skip(skip)
+        .limit(limit)
+        .exec((err, usersDB) => {
+            if (err) {
+                res.status(400).json({
+                    response: {},
+                    status: 400,
+                    error: err
+                });
+            } else {
+                User.count({ state: true }, (err, count) => {
+                    res.json({
+                        response: usersDB,
+                        count
+                    });
+                });
+            }
+        });
 });
 
 app.post('/user', function (req, res) {
@@ -37,7 +59,6 @@ app.post('/user', function (req, res) {
 
             res.json({
                 response: userDB,
-                status: 200,
             });
         }
     });
@@ -65,8 +86,32 @@ app.put('/user/:id', function (req, res) {
 
 });
 
-app.delete('/user', function (req, res) {
-    res.json('delete User')
+app.delete('/user/:id', function (req, res) {
+
+    const id = req.params.id;
+
+    // Finds the user with the given ID and changes his state to false.
+    User.findByIdAndUpdate(id, {state: false}, {new: true}, (err, userDB) => {
+        if (err) {
+            res.status(400).json({
+                response: {},
+                status: 400,
+                error: err
+            });
+        } else {
+            if (!userDB) {
+                return res.status(400).json({
+                    response: {},
+                    error: {
+                        message: 'User not found.'
+                    }
+                });
+            }
+            res.json({
+                response: userDB
+            });
+        }
+    });
 });
 
 module.exports = app;

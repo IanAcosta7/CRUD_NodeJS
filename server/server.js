@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 //Routes
 app.use(require('./routes/user'));
 
-mongoose.connect('mongodb://localhost:27017/CRUD', (err, res) => {
+mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useCreateIndex: true }, (err, res) => {
   if (err) {
     throw err;
   } else {
