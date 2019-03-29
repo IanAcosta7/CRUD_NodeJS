@@ -2,13 +2,20 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const User = require('../models/user');
+const {verifyToken} = require('../middlewares/auth');
 const app = express();
 
 app.get('/', function (req, res) {
     res.json('Hello World')
 });
 
-app.get('/user', function (req, res) {
+app.get('/user', verifyToken, function (req, res) {
+
+    // return res.json({
+    //     user: req.user,
+    //     name: req.user.name,
+    //     email: req.user.email,
+    // });
 
     const skip = Number(req.query.skip) || 0;
     const limit = Number(req.query.limit) || 10;
@@ -19,7 +26,7 @@ app.get('/user', function (req, res) {
         .exec((err, usersDB) => {
             if (err) {
                 res.status(400).json({
-                    response: {},
+                    response: [],
                     status: 400,
                     error: err
                 });
@@ -34,7 +41,7 @@ app.get('/user', function (req, res) {
         });
 });
 
-app.post('/user', function (req, res) {
+app.post('/user', verifyToken, function (req, res) {
 
     const body = req.body;
 
@@ -51,7 +58,7 @@ app.post('/user', function (req, res) {
     user.save((err, userDB) => {
         if (err) {
             res.status(400).json({
-                response: {},
+                response: [],
                 status: 400,
                 error: err
             });
@@ -65,7 +72,7 @@ app.post('/user', function (req, res) {
 
 });
 
-app.put('/user/:id', function (req, res) {
+app.put('/user/:id', verifyToken, function (req, res) {
 
     const id = req.params.id;
     const body = _.pick(req.body, ['name', 'email', 'img', 'state']);
@@ -73,7 +80,7 @@ app.put('/user/:id', function (req, res) {
     User.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, userDB) => {
         if (err) {
             res.status(400).json({
-                response: {},
+                response: [],
                 status: 400,
                 error: err
             });
@@ -86,7 +93,7 @@ app.put('/user/:id', function (req, res) {
 
 });
 
-app.delete('/user/:id', function (req, res) {
+app.delete('/user/:id', verifyToken, function (req, res) {
 
     const id = req.params.id;
 
@@ -94,14 +101,14 @@ app.delete('/user/:id', function (req, res) {
     User.findByIdAndUpdate(id, {state: false}, {new: true}, (err, userDB) => {
         if (err) {
             res.status(400).json({
-                response: {},
+                response: [],
                 status: 400,
                 error: err
             });
         } else {
             if (!userDB) {
                 return res.status(400).json({
-                    response: {},
+                    response: [],
                     error: {
                         message: 'User not found.'
                     }
