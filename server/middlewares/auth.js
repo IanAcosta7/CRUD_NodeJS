@@ -9,7 +9,7 @@ let verifyToken = (req, res, next) => {
         if (err) {
             return res.status(401).json({
                 response: [],
-                error: err
+                error: 'Unvalid token provided.'
             });
         }
 

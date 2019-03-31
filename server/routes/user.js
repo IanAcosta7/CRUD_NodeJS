@@ -5,6 +5,25 @@ const User = require('../models/user');
 const {verifyToken} = require('../middlewares/auth');
 const app = express();
 
+const getResponse = (err, status, res, usersDB) => {
+    User.count({ state: true }, (countErr, count) => {
+        let response = usersDB;
+        let statusCode = 200;
+
+        if (err || countErr) {
+            response = [],
+            statusCode = status
+        }
+
+        res.status(status).json({
+            response,
+            amount: count,
+            status: statusCode,
+            error: err || countErr
+        });
+    });
+};
+
 app.get('/', function (req, res) {
     res.json('Hello World')
 });
@@ -24,20 +43,7 @@ app.get('/user', verifyToken, function (req, res) {
         .skip(skip)
         .limit(limit)
         .exec((err, usersDB) => {
-            if (err) {
-                res.status(400).json({
-                    response: [],
-                    status: 400,
-                    error: err
-                });
-            } else {
-                User.count({ state: true }, (err, count) => {
-                    res.json({
-                        response: usersDB,
-                        count
-                    });
-                });
-            }
+            getResponse(err, 400, res, usersDB);
         });
 });
 
@@ -56,18 +62,7 @@ app.post('/user', verifyToken, function (req, res) {
     });
 
     user.save((err, userDB) => {
-        if (err) {
-            res.status(400).json({
-                response: [],
-                status: 400,
-                error: err
-            });
-        } else {
-
-            res.json({
-                response: userDB,
-            });
-        }
+        getResponse(err, 400, res, userDB);
     });
 
 });
@@ -78,17 +73,7 @@ app.put('/user/:id', verifyToken, function (req, res) {
     const body = _.pick(req.body, ['name', 'email', 'img', 'state']);
 
     User.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, userDB) => {
-        if (err) {
-            res.status(400).json({
-                response: [],
-                status: 400,
-                error: err
-            });
-        } else {
-            res.json({
-                response: userDB
-            });
-        }
+        getResponse(err, 400, res, userDB);
     });
 
 });
@@ -99,24 +84,15 @@ app.delete('/user/:id', verifyToken, function (req, res) {
 
     // Finds the user with the given ID and changes his state to false.
     User.findByIdAndUpdate(id, {state: false}, {new: true}, (err, userDB) => {
-        if (err) {
-            res.status(400).json({
+        if (!userDB) {
+            return res.status(400).json({
                 response: [],
-                status: 400,
-                error: err
+                error: {
+                    message: 'User not found.'
+                }
             });
         } else {
-            if (!userDB) {
-                return res.status(400).json({
-                    response: [],
-                    error: {
-                        message: 'User not found.'
-                    }
-                });
-            }
-            res.json({
-                response: userDB
-            });
+            getResponse(err, 400, res, userDB);
         }
     });
 });
