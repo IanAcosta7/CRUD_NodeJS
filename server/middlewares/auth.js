@@ -20,6 +20,21 @@ let verifyToken = (req, res, next) => {
     // console.log(token);
 }
 
+// Verify Admin Role
+const verifyRole = (req, res, next) => {
+    const role = req.user.role;
+    
+    if (role != 'ADMIN_ROLE') {
+        return res.status(401).json({
+            response: [],
+            error: 'Admin permissions are neccesary.'
+        });
+    }
+
+    next();
+}
+
 module.exports = {
-    verifyToken
+    verifyToken,
+    verifyRole
 };

@@ -3,6 +3,7 @@ require('./config/config');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const app = express();
 
@@ -12,7 +13,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
  
-//Routes
+// Public Folder
+app.use(express.static(path.resolve(__dirname, '../public')));
+
+// Routes
 app.use(require('./routes'));
 
 mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useCreateIndex: true }, (err, res) => {

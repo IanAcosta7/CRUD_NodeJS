@@ -15,4 +15,7 @@ process.env.DB_URL = DB_URL;
 process.env.EXPIRATION_TOKEN = 60 * 60 * 24 * 30;
 
 // Seed
-process.env.SEED = process.env.SEED || 'dev-seed'
+process.env.SEED = process.env.SEED || 'dev-seed';
+
+// Google Client ID
+process.env.CLIENT_ID = process.env.CLIENT_ID || '1069546220836-rgrlrjupnbp65rvfi7hintvinm559ltq.apps.googleusercontent.com'; 

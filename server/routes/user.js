@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const User = require('../models/user');
-const {verifyToken} = require('../middlewares/auth');
+const {verifyToken, verifyRole} = require('../middlewares/auth');
 const app = express();
 
 app.get('/', function (req, res) {
@@ -10,12 +10,6 @@ app.get('/', function (req, res) {
 });
 
 app.get('/user', verifyToken, function (req, res) {
-
-    // return res.json({
-    //     user: req.user,
-    //     name: req.user.name,
-    //     email: req.user.email,
-    // });
 
     const skip = Number(req.query.skip) || 0;
     const limit = Number(req.query.limit) || 10;
@@ -41,7 +35,7 @@ app.get('/user', verifyToken, function (req, res) {
         });
 });
 
-app.post('/user', verifyToken, function (req, res) {
+app.post('/user', verifyToken, verifyRole, function (req, res) {
 
     const body = req.body;
 
@@ -72,7 +66,7 @@ app.post('/user', verifyToken, function (req, res) {
 
 });
 
-app.put('/user/:id', verifyToken, function (req, res) {
+app.put('/user/:id', verifyToken, verifyRole, function (req, res) {
 
     const id = req.params.id;
     const body = _.pick(req.body, ['name', 'email', 'img', 'state']);
@@ -93,7 +87,7 @@ app.put('/user/:id', verifyToken, function (req, res) {
 
 });
 
-app.delete('/user/:id', verifyToken, function (req, res) {
+app.delete('/user/:id', verifyToken, verifyRole, function (req, res) {
 
     const id = req.params.id;
 
